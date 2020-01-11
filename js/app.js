@@ -3,12 +3,56 @@ const slider = document.querySelector('.zoomer__slider');
 const completedLine = document.querySelector('.left__line__completed');
 const showMenu = document.querySelector('.burger');
 const menu = document.querySelector('.menu__wrapper');
-const hideMenu = document.querySelector('.close__menu');
 const gallery = document.querySelector('.gallery');
+const photo = document.querySelectorAll('.photo__item');
+const app = document.querySelector('.app');
+const galleryPhotos = document.querySelectorAll('.gallery__photo');
+const heightPhoto = photo[0].clientHeight / (app.clientWidth / 100);
+
+
+/*window.addEventListener('resize', () => {
+  console.log(heightPhoto);
+});*/
+
+const gridTemplateColumns = (columns) => {
+  for (let elem of galleryPhotos) {
+    elem.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+  }
+};
+
+const sizeGalleryController = (size, shiftDotX) => {
+  if (app.clientWidth >= size) {
+    if (shiftDotX <= 50) {
+      gridTemplateColumns(4);
+    }
+    if (shiftDotX >= 50) {
+      gridTemplateColumns(3);
+    }
+    if (shiftDotX >= 80) {
+      gridTemplateColumns(2);
+    }
+    for (let elem of photo) {
+      elem.style.height = heightPhoto + (shiftDotX / 4) + 'vw';
+    }
+  } else if (app.clientWidth < size) {
+    if (shiftDotX <= 50) {
+      gridTemplateColumns(3);
+    }
+    if (shiftDotX >= 50) {
+      gridTemplateColumns(2);
+    }
+    if (shiftDotX >= 80) {
+      gridTemplateColumns(1);
+    }
+    for (let elem of photo) {
+      elem.style.height = heightPhoto + (shiftDotX / 4) + 'vw';
+    }
+  }
+};
+
 
 scrollBtn.onmousedown = e => {
   e.preventDefault();
-  
   const onScrollMove = e => {
     let shiftDotX = e.clientX - slider.getBoundingClientRect().left;
     if (shiftDotX < 0) {
@@ -19,9 +63,10 @@ scrollBtn.onmousedown = e => {
     }
     scrollBtn.style.left = shiftDotX + '%';
     completedLine.style.width = shiftDotX + '%';
+    sizeGalleryController(1000, shiftDotX);
   };
   
-  const stopScrollMove = e => {
+  const stopScrollMove = () => {
     document.removeEventListener('mouseup', stopScrollMove);
     document.removeEventListener('mousemove', onScrollMove);
   };
@@ -43,9 +88,10 @@ scrollBtn.ontouchstart = e => {
     }
     scrollBtn.style.left = shiftDotX + '%';
     completedLine.style.width = shiftDotX + '%';
+    sizeGalleryController(999, shiftDotX);
   };
   
-  const stopScrollMove = e => {
+  const stopScrollMove = () => {
     document.removeEventListener('touchend', stopScrollMove);
     document.removeEventListener('touchmove', onScrollMove);
   };
@@ -63,7 +109,4 @@ showMenu.onclick = () => {
   menu.classList.add('show');
 };
 
-hideMenu.onclick = () => {
-  menu.classList.remove('show');
-};
 
