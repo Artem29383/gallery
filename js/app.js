@@ -1,6 +1,10 @@
 const scrollBtn = document.querySelector('.slider__dot');
 const slider = document.querySelector('.zoomer__slider');
 const completedLine = document.querySelector('.left__line__completed');
+const showMenu = document.querySelector('.burger');
+const menu = document.querySelector('.menu__wrapper');
+const hideMenu = document.querySelector('.close__menu');
+const gallery = document.querySelector('.gallery');
 
 scrollBtn.onmousedown = (e) => {
   e.preventDefault();
@@ -25,3 +29,18 @@ scrollBtn.onmousedown = (e) => {
   document.addEventListener('mousemove', onScrollMove);
   document.addEventListener('mouseup', stopScrollMove);
 };
+
+
+gallery.onclick = e => {
+  if (e.target.className === 'burger' && !menu.classList.contains('.show')) return false;
+  menu.classList.remove('show');
+};
+
+showMenu.onclick = () => {
+  menu.classList.add('show');
+};
+
+hideMenu.onclick = () => {
+  menu.classList.remove('show');
+};
+
