@@ -4,15 +4,11 @@ const completedLine = document.querySelector('.left__line__completed');
 const showMenu = document.querySelector('.burger');
 const menu = document.querySelector('.menu__wrapper');
 const gallery = document.querySelector('.gallery');
-const photo = document.querySelectorAll('.photo__item');
 const app = document.querySelector('.app');
 const galleryPhotos = document.querySelectorAll('.gallery__photo');
-const heightPhoto = photo[0].clientHeight / (app.clientWidth / 100);
-
-
-/*window.addEventListener('resize', () => {
-  console.log(heightPhoto);
-});*/
+const zoomerSmall = menu.querySelector('.zommer__icon__small');
+const zoomerBigger = menu.querySelector('.zoomer__icon__bigger');
+const sliderLine = menu.querySelector('.zoomer__slider');
 
 const gridTemplateColumns = (columns) => {
   for (let elem of galleryPhotos) {
@@ -20,19 +16,34 @@ const gridTemplateColumns = (columns) => {
   }
 };
 
+const paintingSliderLine = (shiftDotX, error = 0) => {
+  scrollBtn.style.left = shiftDotX - error + '%';
+  completedLine.style.width = shiftDotX + '%';
+};
+
+zoomerSmall.onclick = () => {
+  gridTemplateColumns(4);
+  paintingSliderLine(0);
+};
+
+zoomerBigger.onclick = () => {
+  gridTemplateColumns(1);
+  paintingSliderLine(90);
+};
+
 const sizeGalleryController = (size, shiftDotX) => {
   if (app.clientWidth >= size) {
-    if (shiftDotX <= 50) {
+    if (shiftDotX <= 25) {
       gridTemplateColumns(4);
     }
-    if (shiftDotX >= 50) {
+    if (shiftDotX >= 25) {
       gridTemplateColumns(3);
     }
-    if (shiftDotX >= 80) {
+    if (shiftDotX >= 50) {
       gridTemplateColumns(2);
     }
-    for (let elem of photo) {
-      elem.style.height = heightPhoto + (shiftDotX / 4) + 'vw';
+    if (shiftDotX >= 75) {
+      gridTemplateColumns(1);
     }
   } else if (app.clientWidth < size) {
     if (shiftDotX <= 50) {
@@ -44,61 +55,44 @@ const sizeGalleryController = (size, shiftDotX) => {
     if (shiftDotX >= 80) {
       gridTemplateColumns(1);
     }
-    for (let elem of photo) {
-      elem.style.height = heightPhoto + (shiftDotX / 4) + 'vw';
-    }
   }
 };
 
+sliderLine.onclick = e => {
+  sizeGalleryController(window.innerWidth, e.clientX - 60);
+  paintingSliderLine(e.clientX - 60, 8);
+};
 
-scrollBtn.onmousedown = e => {
+
+const onclickSlider = (e, X, mouseup, mousemove) => {
   e.preventDefault();
-  const onScrollMove = e => {
-    let shiftDotX = e.clientX - slider.getBoundingClientRect().left;
+  const onScrollMove = X => {
+    let shiftDotX = mouseup === 'mouseup'
+      ? X.clientX - slider.getBoundingClientRect().left
+      : X.touches[0].clientX - slider.getBoundingClientRect().left;
     if (shiftDotX < 0) {
       shiftDotX = 0;
     }
     if (shiftDotX > slider.getBoundingClientRect().right - slider.getBoundingClientRect().left - scrollBtn.clientWidth) {
       shiftDotX = slider.getBoundingClientRect().right - slider.getBoundingClientRect().left - scrollBtn.clientWidth;
     }
-    scrollBtn.style.left = shiftDotX + '%';
-    completedLine.style.width = shiftDotX + '%';
+    paintingSliderLine(shiftDotX);
     sizeGalleryController(1000, shiftDotX);
   };
   
   const stopScrollMove = () => {
-    document.removeEventListener('mouseup', stopScrollMove);
-    document.removeEventListener('mousemove', onScrollMove);
+    document.removeEventListener(mouseup, stopScrollMove);
+    document.removeEventListener(mousemove, onScrollMove);
   };
   
-  document.addEventListener('mousemove', onScrollMove);
-  document.addEventListener('mouseup', stopScrollMove);
+  document.addEventListener(mousemove, onScrollMove);
+  document.addEventListener(mouseup, stopScrollMove);
 };
 
-scrollBtn.ontouchstart = e => {
-  e.preventDefault();
-  
-  const onScrollMove = e => {
-    let shiftDotX = e.touches[0].clientX - slider.getBoundingClientRect().left;
-    if (shiftDotX < 0) {
-      shiftDotX = 0;
-    }
-    if (shiftDotX > slider.getBoundingClientRect().right - slider.getBoundingClientRect().left - scrollBtn.clientWidth) {
-      shiftDotX = slider.getBoundingClientRect().right - slider.getBoundingClientRect().left - scrollBtn.clientWidth;
-    }
-    scrollBtn.style.left = shiftDotX + '%';
-    completedLine.style.width = shiftDotX + '%';
-    sizeGalleryController(999, shiftDotX);
-  };
-  
-  const stopScrollMove = () => {
-    document.removeEventListener('touchend', stopScrollMove);
-    document.removeEventListener('touchmove', onScrollMove);
-  };
-  
-  document.addEventListener('touchmove', onScrollMove);
-  document.addEventListener('touchend', stopScrollMove);
-};
+
+scrollBtn.ontouchstart = e => onclickSlider(e, e.touches[0].clientX, 'touchend', 'touchmove');
+scrollBtn.onmousedown = e => onclickSlider(e, e.clientX, 'mouseup', 'mousemove');
+
 
 gallery.onclick = e => {
   if (e.target.className === 'burger' && !menu.classList.contains('.show')) return false;
